@@ -9,6 +9,6 @@ def read_PDF(path):
         with open(f'recipe_text/{text[:20]}.txt', 'w') as f:
             f.write(text)
 
-read_PDF('recipes/TheBestOfBaseballAwards.pdf')
 
+read_PDF(sys.argv[1])
 sys.stdout.flush()

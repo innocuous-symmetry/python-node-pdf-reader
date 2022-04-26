@@ -3,50 +3,48 @@ const http = require('http');
 
 const express = require('express');
 const spawn = require('child_process').spawn;
+const secondSpawn = require('child_process').spawn;
 const app = express();
 const PORT = 3000;
-
-const pyPromise = async (data) => {
-    const python = spawn('python', ['test.py']);
-
-    python.stdout.on("data", (data) => {
-        resolve(data.toString());
-    });
-
-    python.stderr.on("data", (data) => {
-        reject(data.toString());
-    });
-}
 
 app.get('/', (req, res) => {
     res.send("Python stuff?")
 })
 
-app.get('/:name', (req, res) => {
+app.get('/pdfs/:name', (req, res) => {
     const { name } = req.params;
-    const python = spawn('python3', ['test.py', name]);
+    const PATH = `recipe_text/${name}`
 
-    python.stdout.on('data', (data) => {
-        res.send(data.toString());
+    try {
+        fs.access(PATH, fs.constants.F_OK, (err) => {
+            if (err) {
+                throw err;
+            } else {
+                fs.readFile(PATH, 'utf8', (err, data) => {
+                    if (err) throw err;
+                    console.log(data);
+                    const dataSlice = data.slice(0, 150);
+                    res.send("Data found. Preview: " + dataSlice);
+                });
+            }
+        });
+    } catch(e) {
+        console.log(e);
+    }
+})
+
+app.post('/pdf-gen', (req, res) => {
+    const href = req.query.href;
+    const pdfRead = secondSpawn('python3', ['read_pdf.py', href]);
+
+    pdfRead.stdout.on('data', (data) => {
+        res.status(200).send("PDF created!");
     })
 
-    python.stderr.on("data", (data) => {
+    pdfRead.stderr.on("data", (data) => {
         res.send(data.toString());
     })
 })
-
-// app.get('/', (req, res) => {
-//     let dataToSend;
-//     const python = spawn('python', ['test.py']);
-//     python.stdout.on('data', (data) => {
-//         dataToSend = data.toString();
-//         console.log('caught');
-//     });
-//     python.on('close', (code) => {
-//         console.log(`All close with code ${code}`);
-//         res.send(dataToSend);
-//     })
-// })
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
