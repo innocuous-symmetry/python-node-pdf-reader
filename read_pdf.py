@@ -6,8 +6,9 @@ def read_PDF(path):
         text = ""
         for page in doc:
             text += page.get_text()
-        with open(f'../recipe_text/{text[:20]}.txt', 'w') as f:
+        with open(f'recipe_text/{text[:20]}.txt', 'w') as f:
             f.write(text)
 
-read_PDF('../recipes/sample_recipe.pdf')
+read_PDF('recipes/TheBestOfBaseballAwards.pdf')
+
 sys.stdout.flush()
